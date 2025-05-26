@@ -128,5 +128,12 @@ Estas reglas están relacionadas principalmente con la técnica:
 
 ## 🧠 Créditos y contribución
 
-Creado por [TuNombre] | Si encuentras mejoras o deseas aportar nuevas reglas, ¡los PR son bienvenidos!  
+Creado por orakmac | Si encuentras mejoras o deseas aportar nuevas reglas, ¡los PR son bienvenidos!  
 ¿Te fue útil? 🌟 ¡Dale una estrella al repositorio!
+
+Mis redes sociales:
+
+Youtube: https://www.youtube.com/c/Or4kM4cCiberseguridad
+Facebook: https://www.facebook.com/orakmac
+Instagram: https://www.instagram.com/orackmac/
+Tiktok: https://www.tiktok.com/@orackmac
