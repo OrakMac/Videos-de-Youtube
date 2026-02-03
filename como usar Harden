@@ -1,0 +1,8 @@
+✅ Cómo usarlo (resumen rápido)
+sudo nano /usr/local/bin/harden_ssh_orakmac.sh
+sudo chmod 750 /usr/local/bin/harden_ssh_orakmac.sh
+sudo chown root:root /usr/local/bin/harden_ssh_orakmac.sh
+sudo /usr/local/bin/harden_ssh_orakmac.sh
+
+🔍 Verificación post-hardening
+sudo sshd -T | egrep "allowtcpforwarding|maxsessions|loglevel|port|usedns"
