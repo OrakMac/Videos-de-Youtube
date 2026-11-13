@@ -170,7 +170,7 @@
     },
     {
       "parameters": {
-        "url": "https://api.telegram.org/bot8918925514:AAHXQ7JCZ8FmR2kI11Jl0MOzxo5ysz_YjYU/getUpdates",
+        "url": "https://api.telegram.org/TOKEN-TELEGRAM/getUpdates",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -242,7 +242,7 @@
     },
     {
       "parameters": {
-        "url": "https://api.telegram.org/bot8918925514:AAHXQ7JCZ8FmR2kI11Jl0MOzxo5ysz_YjYU/getUpdates",
+        "url": "https://api.telegram.org/TOKEN-TELEGRAM/getUpdates",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -301,7 +301,7 @@
             },
             {
               "name": "entity_id",
-              "value": "notify.echo_pop_de_carolina_hablar"
+              "value": "notify.echo_pop_de"
             }
           ]
         }
