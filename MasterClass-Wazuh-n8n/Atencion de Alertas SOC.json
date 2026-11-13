@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {
-        "chatId": "-1004404824043",
+        "chatId": "CHAT-ID",
         "text": "=🚨 <b>ALERTA DE SEGURIDAD WAZUH</b> 🚨\n===============================\n🔥 <b>Nivel de Severidad:</b> {{ $('Alerta de Wazuh').item.json.body.rule.level }}\n📊 <b>Promedio Malicioso:</b> {{ $('Edit Fields').item.json.promedio }}/ 100\n===============================\n🎯 <b>DATOS DEL OBJETIVO</b>\n├ <b>Agente:</b> {{ $('Alerta de Wazuh').item.json.body.agent.name }}\n├ <b>IP Origen:</b> {{ $('Alerta de Wazuh').item.json.body.data.srcip || $('Alerta de Wazuh').item.json.body.agent.ip }}\n└ <b>Timestamp:</b> {{ $('Alerta de Wazuh').item.json.body.timestamp }}\n\n📜 <b>DETALLES DE LA REGLA</b>\n├ <b>ID Regla:</b> {{ $('Alerta de Wazuh').item.json.body.rule.id }}\n├ <b>Descripción:</b> {{ $('Alerta de Wazuh').item.json.body.rule.description }}\n└ <b>Frecuencia:</b> Disparada {{ $('Alerta de Wazuh').item.json.body.rule.firedtimes }} veces\n\n👤 <b>CONTEXTO DE USUARIO (Si aplica)</b>\n├ <b>Usuario Origen:</b> {{ $('Alerta de Wazuh').item.json.body.data.srcuser || 'N/A' }}\n├ <b>Usuario Destino:</b> {{ $('Alerta de Wazuh').item.json.body.data.dstuser || 'N/A' }}\n└ <b>Comando Ejecutado:</b> <code>{{ $('Alerta de Wazuh').item.json.body.data.command || 'N/A' }}</code>\n\n🛡️ <b>INTELIGENCIA MITRE ATT&CK</b>\n├ <b>Táctica:</b> {{ $('Alerta de Wazuh').item.json.body.rule.mitre.tactic.join(', ') || 'N/A' }}\n└ <b>Técnica:</b> {{ $('Alerta de Wazuh').item.json.body.rule.mitre.technique.join(', ') || 'N/A' }} ({{ $('Alerta de Wazuh').item.json.body.rule.mitre.id.join(', ') || 'N/A' }})\n\n📝 <b>LOG CRUDO DE EVIDENCIA:</b>\n<pre><code class=\"language-text\">{{ $('Alerta de Wazuh').item.json.body.full_log }}</code></pre>",
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
@@ -56,7 +56,7 @@
           "parameters": [
             {
               "name": "x-apikey",
-              "value": "1262b17bfb7268228b567f2ab8ae181745fadc1b793591b9793fcb34d6e5f485"
+              "value": "APIKEY"
             }
           ]
         },
@@ -102,7 +102,7 @@
           "parameters": [
             {
               "name": "key",
-              "value": "8a007235178686870903a19560f489b3d2c6794a4699663c6f7d5e5148d7a11cd0608b13c3c05ee8"
+              "value": "APIKEY"
             }
           ]
         },
@@ -217,7 +217,7 @@
     },
     {
       "parameters": {
-        "chatId": "-1004404824043",
+        "chatId": "CHAT-ID",
         "text": "=🚨 <b>ALERTA DE SEGURIDAD WAZUH</b> 🚨\n===============================\n🔥 <b>Nivel de Severidad:</b> {{ $('Alerta de Wazuh').item.json.body.rule.level }}\n\n===============================\n🎯 <b>DATOS DEL OBJETIVO</b>\n├ <b>Agente:</b> {{ $('Alerta de Wazuh').item.json.body.agent.name }}\n├ <b>IP Origen:</b> {{ $('Alerta de Wazuh').item.json.body.data.srcip || $('Alerta de Wazuh').item.json.body.agent.ip }}\n└ <b>Timestamp:</b> {{ $('Alerta de Wazuh').item.json.body.timestamp }}\n\n📜 <b>DETALLES DE LA REGLA</b>\n├ <b>ID Regla:</b> {{ $('Alerta de Wazuh').item.json.body.rule.id }}\n├ <b>Descripción:</b> {{ $('Alerta de Wazuh').item.json.body.rule.description }}\n└ <b>Frecuencia:</b> Disparada {{ $('Alerta de Wazuh').item.json.body.rule.firedtimes }} veces\n\n👤 <b>CONTEXTO DE USUARIO (Si aplica)</b>\n├ <b>Usuario Origen:</b> {{ $('Alerta de Wazuh').item.json.body.data.srcuser || 'N/A' }}\n├ <b>Usuario Destino:</b> {{ $('Alerta de Wazuh').item.json.body.data.dstuser || 'N/A' }}\n└ <b>Comando Ejecutado:</b> <code>{{ $('Alerta de Wazuh').item.json.body.data.command || 'N/A' }}</code>\n\n🛡️ <b>INTELIGENCIA MITRE ATT&CK</b>\n├ <b>Táctica:</b> {{ $('Alerta de Wazuh').item.json.body.rule.mitre.tactic.join(', ') || 'N/A' }}\n└ <b>Técnica:</b> {{ $('Alerta de Wazuh').item.json.body.rule.mitre.technique.join(', ') || 'N/A' }} ({{ $('Alerta de Wazuh').item.json.body.rule.mitre.id.join(', ') || 'N/A' }})\n\n📝 <b>LOG CRUDO DE EVIDENCIA:</b>\n<pre><code class=\"language-text\">{{ $('Alerta de Wazuh').item.json.body.full_log }}</code></pre>",
         "replyMarkup": "inlineKeyboard",
         "inlineKeyboard": {
