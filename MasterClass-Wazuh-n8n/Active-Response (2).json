@@ -1,0 +1,438 @@
+{
+  "name": "Active-Response",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -720,
+        80
+      ],
+      "id": "e7cbbf9b-7806-475f-a937-b944c46f898b",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://192.168.100.154:55000/security/user/authenticate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "raw",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -48,
+        32
+      ],
+      "id": "bea573d1-5a36-4795-b6ad-b88200f0ac52",
+      "name": "Obtener token",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "vh20SjI1HDLMkS6G",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ab47a3cc-4238-4c03-aa9c-92f556154b6e",
+                    "leftValue": "={{ $json.result[0].callback_query.data }}",
+                    "rightValue": "block",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "693a934b-e904-419f-baf0-33db7c864fd6",
+                    "leftValue": "={{ $json.result[0].callback_query.data }}",
+                    "rightValue": "fp",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d960127d-d531-4b48-8ae9-28a5fdc4c9ef",
+                    "leftValue": "={{ $json.result[0].callback_query.data }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -304,
+        64
+      ],
+      "id": "ba598c40-aab0-48f1-8e64-43ad296b3bbb",
+      "name": "Agente"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://192.168.100.154:55000/active-response?agents_list={{ $('Agente').item.json.result[0].callback_query.data.split('_')[2]}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.data }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"arguments\": [],\n  \"command\": \"!isolate.sh\",\n  \"alert\": {\n    \"data\": {}\n  }\n}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        240,
+        128
+      ],
+      "id": "30f971f4-6e5e-4622-94e4-be3cf0dbf445",
+      "name": "Active-Response"
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/bot8918925514:AAHXQ7JCZ8FmR2kI11Jl0MOzxo5ysz_YjYU/getUpdates",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "actualizaciones",
+              "value": "[\"callback_query\"]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -528,
+        80
+      ],
+      "id": "aa357ebc-1d04-4555-b2e9-8685946c89c1",
+      "name": "Se valido evento"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.result[0].callback_query.message.chat.id }}",
+        "text": "=✅ <b>NOTIFICACIÓN SOC</b> La alerta anterior ha sido analizada y catalogada oficialmente como <b>Falso Positivo</b> por {{ $('Agente').item.json.result[0].callback_query.from.first_name }}.   <i>El caso ha sido cerrado y no se requiere acción de contención.</i>",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        384
+      ],
+      "id": "09ec52e8-f484-4c24-ab16-f142994d3b48",
+      "name": "Send a text message",
+      "webhookId": "3234ec82-e685-4187-ad9e-ffb5dc020049",
+      "credentials": {
+        "telegramApi": {
+          "id": "QhyDviHRCKH6QOmC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Agente').item.json.result[0].callback_query.message.sender_chat.id }}",
+        "text": "=⚠️ <b>ALERTA DE CONTENCIÓN CRÍTICA</b> ⚠️\n\nEl analista <b>{{ $('Agente').item.json.result[0].callback_query.from.first_name }}</b> ha activado el protocolo de cuarentena.\n\n💻 <b>Acción:</b> Aislamiento total del Host.\n⏳ <b>Estado:</b> El equipo está incomunicado de la red (excepto Manager y SSH).\n\n<i>Por favor, iniciar análisis forense inmediatamente.</i>",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        128
+      ],
+      "id": "bb5b88f2-7497-4f73-a82b-fc72e27a679a",
+      "name": "Send a text message1",
+      "webhookId": "3234ec82-e685-4187-ad9e-ffb5dc020049",
+      "credentials": {
+        "telegramApi": {
+          "id": "QhyDviHRCKH6QOmC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/bot8918925514:AAHXQ7JCZ8FmR2kI11Jl0MOzxo5ysz_YjYU/getUpdates",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "offset",
+              "value": "={{ $('Se valido evento').item.json.result[0].update_id + 1 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        704,
+        272
+      ],
+      "id": "e524ce9b-2b35-417b-a49a-325f8e6b4cb9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "editMessageText",
+        "chatId": "={{ $('Se valido evento').item.json.result[0].callback_query.message.chat.id }}",
+        "messageId": "={{ $('Se valido evento').item.json.result[0].callback_query.message.message_id }}",
+        "text": "={{ $('Se valido evento').item.json.result[0].callback_query.message.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        912,
+        272
+      ],
+      "id": "cfd26b0d-cf7f-4c71-8232-087e56c446e0",
+      "name": "Edit a text message",
+      "webhookId": "42b61a1c-1c5c-4026-b5ed-1f915bc1c49c",
+      "credentials": {
+        "telegramApi": {
+          "id": "QhyDviHRCKH6QOmC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "service",
+        "operation": "call",
+        "domain": "notify",
+        "service": "send_message",
+        "serviceAttributes": {
+          "attributes": [
+            {
+              "name": "message",
+              "value": "=Nueva Alerta de SOC detectada \n\n"
+            },
+            {
+              "name": "entity_id",
+              "value": "notify.echo_pop_de_carolina_hablar"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -96
+      ],
+      "id": "f0c8f3ac-3dc1-439b-a3eb-cbea047f71a9",
+      "name": "Call a service1",
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "S94YpiszyQ1oT9IR",
+          "name": "Home Assistant account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Se valido evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener token": {
+      "main": [
+        [
+          {
+            "node": "Active-Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente": {
+      "main": [
+        [
+          {
+            "node": "Obtener token",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Active-Response": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Se valido evento": {
+      "main": [
+        [
+          {
+            "node": "Agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "6852c64a-e5ac-448b-8602-69444c94eb0e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8ee5cea6671743f212d592be73b02a3462eaae82319c641c93acc508e4b6e6b3"
+  },
+  "nodeGroups": [],
+  "id": "JlnBrx4X8GEWAOvF",
+  "tags": []
+}
