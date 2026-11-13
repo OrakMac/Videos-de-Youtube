@@ -1,0 +1,705 @@
+{
+  "name": "Atencion de Alertas SOC",
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "-1004404824043",
+        "text": "=🚨 <b>ALERTA DE SEGURIDAD WAZUH</b> 🚨\n===============================\n🔥 <b>Nivel de Severidad:</b> {{ $('Alerta de Wazuh').item.json.body.rule.level }}\n📊 <b>Promedio Malicioso:</b> {{ $('Edit Fields').item.json.promedio }}/ 100\n===============================\n🎯 <b>DATOS DEL OBJETIVO</b>\n├ <b>Agente:</b> {{ $('Alerta de Wazuh').item.json.body.agent.name }}\n├ <b>IP Origen:</b> {{ $('Alerta de Wazuh').item.json.body.data.srcip || $('Alerta de Wazuh').item.json.body.agent.ip }}\n└ <b>Timestamp:</b> {{ $('Alerta de Wazuh').item.json.body.timestamp }}\n\n📜 <b>DETALLES DE LA REGLA</b>\n├ <b>ID Regla:</b> {{ $('Alerta de Wazuh').item.json.body.rule.id }}\n├ <b>Descripción:</b> {{ $('Alerta de Wazuh').item.json.body.rule.description }}\n└ <b>Frecuencia:</b> Disparada {{ $('Alerta de Wazuh').item.json.body.rule.firedtimes }} veces\n\n👤 <b>CONTEXTO DE USUARIO (Si aplica)</b>\n├ <b>Usuario Origen:</b> {{ $('Alerta de Wazuh').item.json.body.data.srcuser || 'N/A' }}\n├ <b>Usuario Destino:</b> {{ $('Alerta de Wazuh').item.json.body.data.dstuser || 'N/A' }}\n└ <b>Comando Ejecutado:</b> <code>{{ $('Alerta de Wazuh').item.json.body.data.command || 'N/A' }}</code>\n\n🛡️ <b>INTELIGENCIA MITRE ATT&CK</b>\n├ <b>Táctica:</b> {{ $('Alerta de Wazuh').item.json.body.rule.mitre.tactic.join(', ') || 'N/A' }}\n└ <b>Técnica:</b> {{ $('Alerta de Wazuh').item.json.body.rule.mitre.technique.join(', ') || 'N/A' }} ({{ $('Alerta de Wazuh').item.json.body.rule.mitre.id.join(', ') || 'N/A' }})\n\n📝 <b>LOG CRUDO DE EVIDENCIA:</b>\n<pre><code class=\"language-text\">{{ $('Alerta de Wazuh').item.json.body.full_log }}</code></pre>",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "Bloquear Acción",
+                    "additionalFields": {
+                      "callback_data": "=block_agent_{{ $('Alerta de Wazuh').item.json.body.agent.id }}_{{ $('Alerta de Wazuh').item.json.body.agent.ip }}"
+                    }
+                  },
+                  {
+                    "text": "Falso Positivo",
+                    "additionalFields": {
+                      "callback_data": "=fp_regla_{{ $('Alerta de Wazuh').item.json.body.rule.id }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1136,
+        64
+      ],
+      "id": "e417f00d-145b-43bd-b329-8d9df4504016",
+      "name": "Notificacion Telegram",
+      "webhookId": "e371b2c7-4d3c-42ad-af45-03f7152eb991",
+      "credentials": {
+        "telegramApi": {
+          "id": "QhyDviHRCKH6QOmC",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://www.virustotal.com/api/v3/ip_addresses/{{ $json.body.data?.srcip || $json.body.data?.win?.eventdata?.ipAddress || \"\" }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-apikey",
+              "value": "1262b17bfb7268228b567f2ab8ae181745fadc1b793591b9793fcb34d6e5f485"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -32,
+        -128
+      ],
+      "id": "141221a0-3a49-4350-ae4d-927e135a540b",
+      "name": "Virustotal"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "95520753-60fd-4549-b3b3-0a9bdabd8586",
+              "name": "promedio",
+              "value": "={{ ($json.data.attributes.last_analysis_stats.malicious * 10 + $json.data.abuseConfidenceScore) / 2 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        464,
+        48
+      ],
+      "id": "c2ae5769-6a97-492f-9c71-b2685b398d92",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.abuseipdb.com/api/v2/check?ipAddress={{ $json.body.data?.srcip || $json.body.data?.win?.eventdata?.ipAddress || \"\" }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "8a007235178686870903a19560f489b3d2c6794a4699663c6f7d5e5148d7a11cd0608b13c3c05ee8"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -32,
+        80
+      ],
+      "id": "18d08817-1944-4a37-93da-9b8c1d7c3b15",
+      "name": "AbuseIP"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        272,
+        48
+      ],
+      "id": "c25b18c7-6704-4a35-9c54-256ac601a778",
+      "name": "Promedio de Maldad"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1e802e47-f3cf-4488-94fc-f56a22d03752",
+              "leftValue": "={{ $json.promedio }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        688,
+        48
+      ],
+      "id": "81390b77-e4a2-4523-9059-30ccb0e8f71a",
+      "name": "es riesgoso?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "98a29cf9-872a-4dc8-ba2e-2946e967aab5",
+              "leftValue": "={{ $json.body.data?.srcip || $json.body.data?.win?.eventdata?.ipAddress || \"\" }}",
+              "rightValue": "Empty",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -272,
+        128
+      ],
+      "id": "db7fea1c-fe85-4f80-9834-7489d286f336",
+      "name": "Hay IP para analizar?"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wazuh-alertas",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -512,
+        128
+      ],
+      "id": "9bbf38f2-373a-4e9c-80ac-ea21bdffce0e",
+      "name": "Alerta de Wazuh",
+      "webhookId": "6b4b5091-7ffe-463d-a326-2ddd103960f7"
+    },
+    {
+      "parameters": {
+        "chatId": "-1004404824043",
+        "text": "=🚨 <b>ALERTA DE SEGURIDAD WAZUH</b> 🚨\n===============================\n🔥 <b>Nivel de Severidad:</b> {{ $('Alerta de Wazuh').item.json.body.rule.level }}\n\n===============================\n🎯 <b>DATOS DEL OBJETIVO</b>\n├ <b>Agente:</b> {{ $('Alerta de Wazuh').item.json.body.agent.name }}\n├ <b>IP Origen:</b> {{ $('Alerta de Wazuh').item.json.body.data.srcip || $('Alerta de Wazuh').item.json.body.agent.ip }}\n└ <b>Timestamp:</b> {{ $('Alerta de Wazuh').item.json.body.timestamp }}\n\n📜 <b>DETALLES DE LA REGLA</b>\n├ <b>ID Regla:</b> {{ $('Alerta de Wazuh').item.json.body.rule.id }}\n├ <b>Descripción:</b> {{ $('Alerta de Wazuh').item.json.body.rule.description }}\n└ <b>Frecuencia:</b> Disparada {{ $('Alerta de Wazuh').item.json.body.rule.firedtimes }} veces\n\n👤 <b>CONTEXTO DE USUARIO (Si aplica)</b>\n├ <b>Usuario Origen:</b> {{ $('Alerta de Wazuh').item.json.body.data.srcuser || 'N/A' }}\n├ <b>Usuario Destino:</b> {{ $('Alerta de Wazuh').item.json.body.data.dstuser || 'N/A' }}\n└ <b>Comando Ejecutado:</b> <code>{{ $('Alerta de Wazuh').item.json.body.data.command || 'N/A' }}</code>\n\n🛡️ <b>INTELIGENCIA MITRE ATT&CK</b>\n├ <b>Táctica:</b> {{ $('Alerta de Wazuh').item.json.body.rule.mitre.tactic.join(', ') || 'N/A' }}\n└ <b>Técnica:</b> {{ $('Alerta de Wazuh').item.json.body.rule.mitre.technique.join(', ') || 'N/A' }} ({{ $('Alerta de Wazuh').item.json.body.rule.mitre.id.join(', ') || 'N/A' }})\n\n📝 <b>LOG CRUDO DE EVIDENCIA:</b>\n<pre><code class=\"language-text\">{{ $('Alerta de Wazuh').item.json.body.full_log }}</code></pre>",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "🛑 Bloquear Acción",
+                    "additionalFields": {
+                      "callback_data": "=block_agent_{{ $('Alerta de Wazuh').item.json.body.agent.id }}_{{ $json.body.agent.ip }}"
+                    }
+                  },
+                  {
+                    "text": "=✅ Falso Positivo",
+                    "additionalFields": {
+                      "callback_data": "=fp_regla_{{ $('Alerta de Wazuh').item.json.body.rule.id }}"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        304
+      ],
+      "id": "4c16d469-a28d-4c30-b72e-1059401128b6",
+      "name": "Notificacion con accion",
+      "webhookId": "e371b2c7-4d3c-42ad-af45-03f7152eb991",
+      "credentials": {
+        "telegramApi": {
+          "id": "31AUroyEToOmicDO",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"type\": \"wazuh_alert\",\n  \"source\": \"Wazuh\",\n  \"sourceRef\": \"{{ $('Alerta de Wazuh').item.json.body.rule.id }}\",\n  \"externalLink\": \"https://192.168.100.154\",\n  \"title\": \"Alerta de Seguridad: {{ $('Alerta de Wazuh').item.json.body.rule.description }}\",\n  \"description\": \"Se ha detectado un evento de seguridad en el agente.{{ $('Alerta de Wazuh').item.json.body.agent.id }}\",\n  \"severity\": 2,\n  \"date\": {{ Date.now() }},\n  \"tags\": [\n    \"Wazuh\",\n    \"ActiveResponse\",\n    \"Rule_{{ $('Alerta de Wazuh').item.json.body.rule.id }}\"\n  ],\n  \"flag\": true,\n  \"tlp\": 2,\n  \"pap\": 2,\n  \"customFields\": {},\n  \"summary\": \"Respuesta activa solicitada desde Telegram para el agente {{ $('Alerta de Wazuh').item.json.body.agent.id }}\",\n  \"status\": \"New\",\n  \"assignee\": \"c413074454@gmail.com\",\n  \"caseTemplate\": \"\",\n  \"observables\": [\n    {\n      \"dataType\": \"ip\",\n      \"data\": [\n        \"{{ $('Alerta de Wazuh').item.json.body.agent.ip }}\"\n      ],\n      \"message\": \"IP origen asociada al intento de ataque u origen del bloqueo\",\n      \"startDate\": {{ Date.now() }},\n      \"tlp\": 2,\n      \"pap\": 2,\n      \"tags\": [\n        \"Attacker_IP\"\n      ],\n      \"ioc\": true,\n      \"sighted\": true,\n      \"sightedAt\": {{ Date.now() }},\n      \"ignoreSimilarity\": false,\n      \"isZip\": false\n    }\n  ],\n  \"procedures\": [\n    {\n      \"patternId\": \"{{ $('Alerta de Wazuh').item.json.body.rule.id }}\",\n      \"occurDate\": {{ Date.now() }},\n      \"tactic\": \"Initial Access\",\n      \"description\": \"Regla Wazuh gatillada:{{ $('Alerta de Wazuh').item.json.body.rule.description }} \"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        864,
+        -224
+      ],
+      "id": "9926a7a3-466e-41d0-a0ad-b814f1fb1b36",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "alertFields": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "=ALERT-{{ $json.title }}",
+            "description": "={{ $json.description }}",
+            "type": "={{ $json.type }}",
+            "source": "={{ $json.source }}",
+            "sourceRef": "={{ $json.sourceRef }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "displayName": "Title",
+              "id": "title",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Description",
+              "id": "description",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Type",
+              "id": "type",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Source",
+              "id": "source",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Source Reference",
+              "id": "sourceRef",
+              "type": "string",
+              "removed": false,
+              "required": true,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "External Link",
+              "id": "externalLink",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Severity (Severity of information)",
+              "id": "severity",
+              "type": "options",
+              "options": [
+                {
+                  "name": "Low",
+                  "value": 1
+                },
+                {
+                  "name": "Medium",
+                  "value": 2
+                },
+                {
+                  "name": "High",
+                  "value": 3
+                },
+                {
+                  "name": "Critical",
+                  "value": 4
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Date",
+              "id": "date",
+              "type": "dateTime",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Tags",
+              "id": "tags",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Follow",
+              "id": "follow",
+              "type": "boolean",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Flag",
+              "id": "flag",
+              "type": "boolean",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "TLP (Confidentiality of information)",
+              "id": "tlp",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "PAP (Level of exposure of information)",
+              "id": "pap",
+              "type": "options",
+              "options": [
+                {
+                  "name": "White",
+                  "value": 0
+                },
+                {
+                  "name": "Green",
+                  "value": 1
+                },
+                {
+                  "name": "Amber",
+                  "value": 2
+                },
+                {
+                  "name": "Red",
+                  "value": 3
+                }
+              ],
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Summary",
+              "id": "summary",
+              "type": "string",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false
+            },
+            {
+              "displayName": "Status",
+              "id": "status",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": [
+                {
+                  "name": "Duplicate",
+                  "value": "Duplicate",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "FalsePositive",
+                  "value": "FalsePositive",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Ignored",
+                  "value": "Ignored",
+                  "description": "Stage: Closed"
+                },
+                {
+                  "name": "Imported",
+                  "value": "Imported",
+                  "description": "Stage: Imported"
+                },
+                {
+                  "name": "InProgress",
+                  "value": "InProgress",
+                  "description": "Stage: InProgress"
+                },
+                {
+                  "name": "New",
+                  "value": "New",
+                  "description": "Stage: New"
+                },
+                {
+                  "name": "Pending",
+                  "value": "Pending",
+                  "description": "Stage: InProgress"
+                }
+              ]
+            },
+            {
+              "displayName": "Case Template",
+              "id": "caseTemplate",
+              "type": "options",
+              "removed": true,
+              "required": false,
+              "display": true,
+              "defaultMatch": false,
+              "options": []
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "observableUi": {
+          "values": [
+            {
+              "dataType": "ip",
+              "data": "={{ $('Alerta de Wazuh').item.json.body.data.srcip }}",
+              "message": "=IP Maliciosa con nivel de severidad {{ $('Edit Fields').item.json.promedio }}",
+              "tags": "=Ip maliciosa"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.theHiveProject",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        -224
+      ],
+      "id": "2544e4af-bc5d-4787-be3b-294b2ea17c6d",
+      "name": "Create an alert",
+      "credentials": {
+        "theHiveProjectApi": {
+          "id": "7d3ylHUHlmblnPyV",
+          "name": "The Hive 5 account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Virustotal": {
+      "main": [
+        [
+          {
+            "node": "Promedio de Maldad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "es riesgoso?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AbuseIP": {
+      "main": [
+        [
+          {
+            "node": "Promedio de Maldad",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Promedio de Maldad": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "es riesgoso?": {
+      "main": [
+        [
+          {
+            "node": "Notificacion Telegram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notificacion Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hay IP para analizar?": {
+      "main": [
+        [
+          {
+            "node": "AbuseIP",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Virustotal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notificacion con accion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alerta de Wazuh": {
+      "main": [
+        [
+          {
+            "node": "Hay IP para analizar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificacion con accion": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Create an alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an alert": {
+      "main": [
+        []
+      ]
+    },
+    "Notificacion Telegram": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "003ff3a2-21ab-4a63-971c-d372a8c04fa0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8ee5cea6671743f212d592be73b02a3462eaae82319c641c93acc508e4b6e6b3"
+  },
+  "nodeGroups": [],
+  "id": "DDXVh4CSBLo6YEDH",
+  "tags": []
+}
